@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>RShort | URL</title>
+    <!-- UIkit CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/uikit/3.0.3/css/uikit.min.css" />
+    <link rel="stylesheet" href="/static/main.css" />
+
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+
+    <!-- UIkit JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/uikit/3.0.3/js/uikit.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/uikit/3.0.3/js/uikit-icons.min.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+</head>
+<body>
+
+  <main id="app">
+
+      <div class="uk-flex uk-margin-large-top">
+          <div class="uk-margin-auto uk-margin-auto-vertical uk-width-1-3@s uk-card uk-card-default uk-card-body">
+
+              <header>
+                  <h1> <i class="material-icons">link</i> Welcome to Rshort</h1>
+                  <h3>Shorten your URLs, powerful and quickly</h3>
+              </header>
+
+              <hr>
+
+              <form class="uk-margin-medium">
+
+                  <div class="uk-margin-medium">
+                      <label>URL: </label>
+                      <input class="uk-input" type="text" v-model="url" placeholder="http://www.example.com/mylargeurltoaction?a=23das4&das=2343522" require>
+                      <div id="url_error" class="uk-alert-danger">{{url_error}}</div>
+                  </div>
+
+                  <div class="uk-margin-medium">
+                      <label>Key: </label>
+                      <input class="uk-input" type="text" v-model="key_value" v-on:input="trim" placeholder="Short key" require>
+                      <div id="key_error" class="uk-alert-danger">{{key_error}}</div>
+                  </div>
+
+                  <div class="uk-margin-large uk-text-center">
+                      <label>URL preview: http://rshort.xyz/{{key_value}}</label>
+                  </div>
+
+                  <div class="uk-text-center">
+                      <input type="button" value="GET MY URL" class="uk-button uk-button-primary" v-on:click="genLink()">
+                  </div>
+
+              </form>
+
+          </div>
+      </div>
+
+
+      <!-- This is the modal -->
+      <div id="modal-example" uk-modal>
+          <div class="uk-modal-dialog uk-modal-body">
+              <p>
+                  your pretty url is ready, click <a href="#" onclick="copy()">here</a> to copy to your clipboard
+              </p>
+              <input type="text" v-model="pretty_url" id="copiable" class="uk-input" readonly>
+
+              <p class="uk-text-right">
+                  <button class="uk-button uk-button-primary  uk-modal-close" type="button">CLOSE</button>
+              </p>
+          </div>
+      </div>
+
+
+
+
+  </main>
+
+  <!-- This is an anchor toggling the modal -->
+  <a href="#modal-example" uk-toggle>Open</a>
+
+
+
+  <script type="text/javascript">
+
+      var app = new Vue({
+          el: '#app',
+          data: {
+              url: '',
+              key_value: '',
+              url_error: '',
+              key_error: '',
+              pretty_url: 'http://rshort.xyz/testforcopy'
+          },
+          methods: {
+              trim: function(){
+                  this.key_value = this.key_value.replace(" ","")
+              },
+              genLink: function(ev){
+
+                  UIkit.modal($("#modal-example")).show();
+
+                  axios.post('/save-key', {
+                      url: this.url,
+                      key: this.key_value
+                  })
+                  .then(function (response) {
+                      console.log(response);
+                      UIkit.modal($("#modal-example")).show();
+                      copy();
+                  })
+                  .catch(function (error) {
+                      console.log(error);
+                  });
+
+
+              }
+          }
+      })
+
+      function copy() {
+          var copyText = document.getElementById("copiable");
+          copyText.select();
+          alert("Copied to your clipboard")
+          document.execCommand("copy");
+      }
+
+  </script>
+
+</body>
+</html>
