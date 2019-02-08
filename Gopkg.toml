@@ -6,7 +6,6 @@
 # required = ["github.com/user/thing/cmd/thing"]
 # ignored = ["github.com/user/project/pkgX", "bitbucket.org/user/project/pkgA/pkgY"]
 # [metadata.heroku]
-#   root-package = "main"
 # [[constraint]]
 #   name = "github.com/user/project"
 #   version = "1.0.0"
@@ -25,6 +24,9 @@
 #   go-tests = true
 #   unused-packages = true
 
+
+[metadata.heroku]
+  root-package = "github.com/koerhunt/rshort"
 
 [prune]
   go-tests = true
