@@ -32,7 +32,7 @@ func main() {
 		url = os.Args[2]
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 	r, err := c.CutURL(ctx, &pb.CutUrlRequest{Key: key,Url: url})
 	if err != nil {

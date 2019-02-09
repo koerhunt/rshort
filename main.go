@@ -50,7 +50,7 @@ func (s *grpcServer) CutURL(ctx context.Context, in *pb.CutUrlRequest) (*pb.CutU
 		return &pb.CutUrlReply{Status: 200, Data: "https://rshort.herokuapp.com/url/"+data.Key}, nil
 	}else{
 		log.Printf("responded false")
-		log.Fatal(err)
+		log.Print(err)
 		return &pb.CutUrlReply{Status: 422, Data: "No se completo la accion"}, nil
 	}
 }
