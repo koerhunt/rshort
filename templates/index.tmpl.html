@@ -75,13 +75,24 @@
           </div>
       </div>
 
+      <!-- This is the modal -->
+      <div id="modal-err" uk-modal>
+          <div class="uk-modal-dialog uk-modal-body">
+              <p>
+                  This key is already taken
+              </p>
+
+              <p class="uk-text-right">
+                  <button class="uk-button uk-button-primary  uk-modal-close" type="button">CLOSE</button>
+              </p>
+          </div>
+      </div>
+
+
 
 
 
   </main>
-
-  <!-- This is an anchor toggling the modal -->
-  <a href="#modal-example" uk-toggle>Open</a>
 
 
 
@@ -94,7 +105,7 @@
               key_value: '',
               url_error: '',
               key_error: '',
-              pretty_url: 'https://rshort.herokuapp.com/testforcopy'
+              pretty_url: ''
           },
           methods: {
               trim: function(){
@@ -102,19 +113,19 @@
               },
               genLink: function(ev){
 
-                  UIkit.modal($("#modal-example")).show();
+                  this.pretty_url = "https://rshort.herokuapp.com/url/"+this.key_value
 
                   axios.post('/save-key', {
                       url: this.url,
                       key: this.key_value
                   })
                   .then(function (response) {
-                      console.log(response);
-                      UIkit.modal($("#modal-example")).show();
-                      copy();
+                      if(response.status==204){
+                          UIkit.modal($("#modal-example")).show();
+                      }
                   })
                   .catch(function (error) {
-                      console.log(error);
+                      UIkit.modal($("#modal-err")).show();
                   });
 
 
