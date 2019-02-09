@@ -31,7 +31,7 @@ type EntryUrlModel struct {
 }
 
 const (
-	grpcPort = ":50051"
+	grpcPort = ":8080"
 )
 
 
@@ -82,9 +82,9 @@ func makeMgoSession() (*mgo.Session, error){
 
 func main() {
 
-	go startGrpc()
+	startGrpc()
 
-	startWeb()
+	//startWeb()
 
 }
 
