@@ -46,8 +46,10 @@ func (s *grpcServer) CutURL(ctx context.Context, in *pb.CutUrlRequest) (*pb.CutU
 	saved, err := CreateUrlEntry(&data)
 
 	if saved {
+		log.Printf("responded true")
 		return &pb.CutUrlReply{Status: 200, Data: "https://rshort.herokuapp.com/url/"+data.Key}, nil
 	}else{
+		log.Printf("responded false")
 		log.Fatal(err)
 		return &pb.CutUrlReply{Status: 422, Data: "No se completo la accion"}, nil
 	}
@@ -78,12 +80,11 @@ func makeMgoSession() (*mgo.Session, error){
 
 }
 
-
 func main() {
 
 	go startGrpc()
-	startWeb()
 
+	startWeb()
 
 }
 
@@ -156,6 +157,7 @@ func startWeb()  {
 
 	router.Run(":" + port)
 }
+
 func startGrpc()  {
 	lis, err := net.Listen("tcp", grpcPort)
 	if err != nil {
@@ -169,6 +171,7 @@ func startGrpc()  {
 		log.Fatalf("failed to serve: %v", err)
 	}
 }
+
 func CreateUrlEntry(data *EntryUrlModel) (bool, error) {
 
 	//set connection
@@ -177,6 +180,7 @@ func CreateUrlEntry(data *EntryUrlModel) (bool, error) {
 		log.Fatal(err)
 		return false, err
 	}
+
 	collection := s.DB("rshort").C("urls")
 
 	result := EntryUrl{}
