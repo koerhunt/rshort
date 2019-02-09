@@ -1,5 +1,7 @@
 FROM heroku/heroku:16-build as build
 
+EXPOSE 50051
+
 COPY . /app
 WORKDIR /app
 
@@ -19,5 +21,3 @@ WORKDIR /app
 RUN useradd -m heroku
 USER heroku
 CMD /app/bin/go-getting-started
-
-EXPOSE 50051
