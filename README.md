@@ -11,3 +11,8 @@ MONGO_DB="admin"
 MONGO_USER="password"
 MONGO_PWD="password"
 ```
+
+#if you need generate grpc serivce
+
+run:
+```protoc -I grpc grpc/rshort.proto --go_out=plugins=grpc:grpc```

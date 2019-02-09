@@ -81,6 +81,14 @@ func makeMgoSession() (*mgo.Session, error){
 
 func main() {
 
+	go startGrpc()
+	startWeb()
+
+
+}
+
+func startWeb()  {
+
 	//LOAD ENV
 	port := os.Getenv("PORT")
 
@@ -88,12 +96,6 @@ func main() {
 		log.Fatal("$PORT must be set")
 	}
 
-	startWeb()
-	startGrpc()
-
-}
-
-func startWeb()  {
 	//Setup Webserer
 	router := gin.Default()
 	router.Delims("<%=", "%>")
