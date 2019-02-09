@@ -1,4 +1,8 @@
 # Binaries for programs and plugins
+.idea
+.idea/workspace.xml
+/vendor
+.env
 *.exe
 *.exe~
 *.dll
