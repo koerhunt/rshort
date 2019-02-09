@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"crypto/tls"
 	"github.com/gin-gonic/gin"
 	_ "github.com/heroku/x/hmetrics/onload"
@@ -10,6 +11,9 @@ import (
 	"net"
 	"net/http"
 	"os"
+	pb "github.com/koerhunt/rshort/grpc"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
 //MODELS
@@ -20,14 +24,39 @@ type EntryUrl struct {
 	ExpireAt string
 }
 
+//parse params
+type EntryUrlModel struct {
+	Url     string `json:"url" binding:"required"`
+	Key string `json:"key" binding:"required"`
+}
+
+const (
+	grpcPort = ":50051"
+)
+
+
+type grpcServer struct{}
+
+func (s *grpcServer) CutURL(ctx context.Context, in *pb.CutUrlRequest) (*pb.CutUrlReply, error) {
+	log.Printf("Received: %v", in.Key)
+	log.Printf("Received: %v", in.Url)
+
+	data := EntryUrlModel{Url: in.Url, Key: in.Key}
+
+	saved, err := CreateUrlEntry(&data)
+
+	if saved {
+		return &pb.CutUrlReply{Status: 200, Data: "https://rshort.herokuapp.com/url/"+data.Key}, nil
+	}else{
+		log.Fatal(err)
+		return &pb.CutUrlReply{Status: 422, Data: "No se completo la accion"}, nil
+	}
+}
 
 //ENDOMDELS
 func makeMgoSession() (*mgo.Session, error){
 
-	tlsConfig := &tls.Config{
-
-	}
-
+	tlsConfig := &tls.Config{}
 
 	dialInfo := &mgo.DialInfo{
 		Addrs: []string{os.Getenv("MONGO_R0"),os.Getenv("MONGO_R1"),os.Getenv("MONGO_R2")},
@@ -59,6 +88,12 @@ func main() {
 		log.Fatal("$PORT must be set")
 	}
 
+	startWeb()
+	startGrpc()
+
+}
+
+func startWeb()  {
 	//Setup Webserer
 	router := gin.Default()
 	router.Delims("<%=", "%>")
@@ -102,46 +137,64 @@ func main() {
 	//POST /save-key
 	router.POST("/save-key", func(c *gin.Context){
 
-		//parse params
-		type EntryUrl struct {
-			Url     string `json:"url" binding:"required"`
-			Key string `json:"key" binding:"required"`
-		}
-
-		var data EntryUrl
+		var data EntryUrlModel
 		c.Bind(&data)
 
-		//set connection
-		s, err := makeMgoSession()
-		if err != nil {
-			log.Fatal(err)
-		}
-		collection := s.DB("rshort").C("urls")
+		saved, err := CreateUrlEntry(&data)
 
-
-		result := EntryUrl{}
-		err2 := collection.Find(bson.M{"key": data.Key}).One(&result)
-
-
-		if err2 != nil {
-
-			err = collection.Insert(&EntryUrl{Key: data.Key, Url: data.Url})
-			if err != nil {
-				log.Fatal(err)
-				c.JSON(http.StatusUnprocessableEntity,"{message: 'Error saving record'}")
-
-			}else{
-				c.JSON(http.StatusNoContent,"{}")
-			}
-
+		if saved {
+			c.JSON(http.StatusNoContent,"{}")
 		}else{
-
-			c.JSON(http.StatusUnprocessableEntity,"{message: 'Key is not available'}")
+			log.Fatal(err)
+			c.JSON(http.StatusUnprocessableEntity,"{message: 'Error saving record'}")
 		}
-
 
 
 	})
 
 	router.Run(":" + port)
+}
+func startGrpc()  {
+	lis, err := net.Listen("tcp", grpcPort)
+	if err != nil {
+		log.Fatalf("grpc failed to listen: %v", err)
+	}
+	s := grpc.NewServer()
+	pb.RegisterRshorterServer(s, &grpcServer{})
+	// Register reflection service on gRPC server.
+	reflection.Register(s)
+	if err := s.Serve(lis); err != nil {
+		log.Fatalf("failed to serve: %v", err)
+	}
+}
+func CreateUrlEntry(data *EntryUrlModel) (bool, error) {
+
+	//set connection
+	s, err := makeMgoSession()
+	if err != nil {
+		log.Fatal(err)
+		return false, err
+	}
+	collection := s.DB("rshort").C("urls")
+
+	result := EntryUrl{}
+
+	//Check if exists
+	err2 := collection.Find(bson.M{"key": data.Key}).One(&result)
+
+	if err2 != nil {
+
+		err = collection.Insert(&EntryUrl{Key: data.Key, Url: data.Url})
+		if err != nil {
+			log.Fatal(err)
+			return false, err
+		}else{
+			return true, nil
+		}
+
+	}else{
+		return false, err2
+	}
+
+
 }

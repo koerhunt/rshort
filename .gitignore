@@ -1,6 +1,8 @@
 # Binaries for programs and plugins
 .idea
+.idea/rshort.iml
 .idea/workspace.xml
+.idea/rshort.iml
 /vendor
 .env
 *.exe

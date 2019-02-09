@@ -1,0 +1,24 @@
+
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "koerhunt.rshort";
+option java_outer_classname = "RShort";
+
+package rshort;
+
+service Rshorter {
+    rpc CutURL (CutUrlRequest) returns (CutUrlReply) {}
+}
+
+//Url cut request
+message CutUrlRequest {
+    string url = 1;
+    string key = 2;
+}
+
+//The responde with status and response data
+message CutUrlReply {
+    int32 status = 1;
+    string data = 2;
+}
