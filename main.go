@@ -5,15 +5,16 @@ import (
 	"crypto/tls"
 	"github.com/gin-gonic/gin"
 	_ "github.com/heroku/x/hmetrics/onload"
+	pb "github.com/koerhunt/rshort/grpc"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 	"log"
 	"net"
 	"net/http"
 	"os"
-	pb "github.com/koerhunt/rshort/grpc"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
+	"github.com/joho/godotenv"
 )
 
 //MODELS
@@ -81,6 +82,9 @@ func makeMgoSession() (*mgo.Session, error){
 }
 
 func main() {
+
+
+	loadEnv()
 
 	go startGrpc()
 
@@ -169,6 +173,13 @@ func startGrpc()  {
 	reflection.Register(s)
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
+	}
+}
+
+func loadEnv(){
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
 	}
 }
 
