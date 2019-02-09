@@ -102,15 +102,45 @@ func main() {
 	//POST /save-key
 	router.POST("/save-key", func(c *gin.Context){
 
-		//err = c.Insert(&EntryUrl{"https://google.com", "google", ""})
-		//if err != nil {
-		//	log.Fatal(err)
-		//}
+		//parse params
+		type EntryUrl struct {
+			Url     string `json:"url" binding:"required"`
+			Key string `json:"key" binding:"required"`
+		}
 
-		st := http.StatusNoContent
-		st = http.StatusUnprocessableEntity
+		var data EntryUrl
+		c.Bind(&data)
 
-		c.JSON(st,"")
+		//set connection
+		s, err := makeMgoSession()
+		if err != nil {
+			log.Fatal(err)
+		}
+		collection := s.DB("rshort").C("urls")
+
+
+		result := EntryUrl{}
+		err2 := collection.Find(bson.M{"key": data.Key}).One(&result)
+
+
+		if err2 != nil {
+
+			err = collection.Insert(&EntryUrl{Key: data.Key, Url: data.Url})
+			if err != nil {
+				log.Fatal(err)
+				c.JSON(http.StatusUnprocessableEntity,"{message: 'Error saving record'}")
+
+			}else{
+				c.JSON(http.StatusNoContent,"{}")
+			}
+
+		}else{
+
+			c.JSON(http.StatusUnprocessableEntity,"{message: 'Key is not available'}")
+		}
+
+
+
 	})
 
 	router.Run(":" + port)
