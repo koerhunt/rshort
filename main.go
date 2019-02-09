@@ -4,7 +4,6 @@ import (
 	"crypto/tls"
 	"github.com/gin-gonic/gin"
 	_ "github.com/heroku/x/hmetrics/onload"
-	"github.com/joho/godotenv"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 	"log"
@@ -50,18 +49,10 @@ func makeMgoSession() (*mgo.Session, error){
 
 }
 
-func loadEnv(){
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
-}
 
 func main() {
 
 	//LOAD ENV
-	loadEnv()
-
 	port := os.Getenv("PORT")
 
 	if port == "" {
